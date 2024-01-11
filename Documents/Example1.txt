@@ -1,0 +1,12 @@
+Sample 1
+PopSize 10000
+NoQTL 1
+Generations 6500
+Ploidy 2
+ChangeFitnessSD 5000	0.170000
+MoveFitnessSD 5000 2.0
+OptimumMoveType phenotype
+PhenotypeVar 0.01
+MutationScalar 0.001
+Heritability 0.5
+seed 2510688862
