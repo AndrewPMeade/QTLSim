@@ -9,7 +9,7 @@ See ./Documents/QTLSimManual.pdf for more information.
 # System requirements
 QTLSim is written in C and requires the GSL – GNU Scientific Library (https://www.gnu.org/software/gsl/). It has been tested on Windows 10, OS X (Intel and ARM) and Linux (Rocks 7.0). The program should run on any system that has a C99 compiler. 
 
-#Installation guide
+# Installation guide
 The program is a standalone binary and does not require installation. 
 
 # Demo and Instructions for use
