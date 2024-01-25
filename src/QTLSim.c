@@ -14,12 +14,12 @@
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
-* 
+*
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>
 *
@@ -73,12 +73,12 @@ void CaclOptParm(OPTIONS *Opt)
 
  void AllocAddtionalOptions(OPTIONS* Opt)
  {
-	 CaclOptParm(Opt);	
+	 CaclOptParm(Opt);
 
 	Opt->rng = gsl_rng_alloc(gsl_rng_mt19937);
 
 	gsl_rng_set(Opt->rng, Opt->Seed);
-	
+
 	Opt->X = (double*)SMalloc(sizeof(double) * Opt->PopSize);
 	Opt->Y = (double*)SMalloc(sizeof(double) * Opt->PopSize);
  }
@@ -93,7 +93,7 @@ void SetDefOptions(OPTIONS* Opt)
 //	Opt->EnvVar = 3.0;
 	Opt->MuteVarScalar = 1.0 / 1000.00;
 //	Opt->MuteVar = Opt->EnvVar * Opt->MuteVarScalar;
-	
+
 	Opt->FitnessPar = SetFitnessNormalParam(0.0, 0.1);
 	Opt->Seed = GetSeed();
 	Opt->Drift = FALSE;
@@ -112,7 +112,7 @@ void SetDefOptions(OPTIONS* Opt)
 
 	Opt->StandardisePhenotype = FALSE;
 
-	Opt->MoveType = PHENOTYPE;	
+	Opt->MoveType = PHENOTYPE;
 
 	Opt->AssortativeMating = -1;
 
@@ -145,7 +145,7 @@ void FreeOptions(OPTIONS* Opt)
 }
 
 void PrintOptions(OPTIONS* Opt)
-{	
+{
 	printf("Version:\t%f\n", VERSION);
 
 	printf("Fitness:\t%f\t%f\n", Opt->FitnessPar[0], Opt->FitnessPar[1]);
@@ -206,7 +206,7 @@ void PrintOptions(OPTIONS* Opt)
 */
 
 	printf("InitFitnessSD:\t%f\n", Opt->InitFitnessSD);
-		
+
 	fflush(stdout);
 }
 
@@ -279,7 +279,7 @@ POP* CreatePop(OPTIONS* Opt)
 
 	for(Index=0;Index<Opt->PopSize;Index++)
 		Pop->Pop[Index] = CreateIndividual(Opt);
-				
+
 
 	Pop->TVect = (double*)SMalloc(sizeof(double) * Opt->PopSize);
 
@@ -320,7 +320,7 @@ double  CaclGenotype(OPTIONS* Opt, INDIVIDUAL* Ind)
 	{
 		for(Index=0;Index<Opt->NoQTL;Index++)
 			Genotype += Ind->Genome[0][Index] + Ind->Genome[1][Index];
-				
+
 	}
 
 #ifdef QTL_AVE
@@ -350,13 +350,13 @@ void CaclPopPhenotype(OPTIONS* Opt, POP* Pop)
 	}
 
 }
-/* Opt->MuteRate is not defined. 
+/* Opt->MuteRate is not defined.
 void MutateIndividualChrNoPoisson(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 {
 	int NoMuts, Pos, Index;
-	
+
 	NoMuts = gsl_ran_poisson(Opt->rng, Opt->MuteRate * Opt->NoQTL);
-	
+
 	for(Index=0;Index<NoMuts;Index++)
 	{
 		Pos = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL);
@@ -374,7 +374,7 @@ void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 
 	if(Opt->Ploidy == 2)
 		Scale = sqrt(2.0);
-	
+
 	for(Index=0;Index<Opt->NoQTL;Index++)
 	{
 #ifdef QTL_AVE
@@ -487,7 +487,7 @@ int ValidDiploidParents(OPTIONS* Opt, INDIVIDUAL *P1, INDIVIDUAL *P2, double Phe
 
 //	if(fabs(P1->Fitness - P2->Fitness) > Opt->AssortativeMating)
 //		return FALSE;
-	
+
 	return AcceptMatting(P1->Phenotype, P2->Phenotype, PhenotypeSD * Opt->AssortativeMating);
 }
 
@@ -535,7 +535,7 @@ void NewPop(OPTIONS* Opt, POP *CPop, POP *NPop)
 	int IIndex;
 	INDIVIDUAL *CIn;
 	double PhenotypeSD;
-	
+
 //	Opt->BreedingT = 0;
 
 	SetSurviving(Opt, CPop);
@@ -622,7 +622,7 @@ void PopFitness(OPTIONS *Opt, int Itter, POP *Pop)
 
 
 //	PhenotypeSD = gsl_stats_sd(Pop->TVect, 1, Opt->PopSize);
-	
+
 	if(Itter >= Opt->MoveFitnessSDGen && Opt->MoveFitnessSDGen != -1)
 		SetFitnessMean(Opt, Pop);
 
@@ -663,13 +663,27 @@ void GetEnvVect(OPTIONS* Opt,POP* Pop,double *Vect)
 		Vect[Index] = Pop->Pop[Index]->Env;
 }
 
+void PrintVectMean(double* Vect, int Size)
+{
+	double Mean;
+	Mean = gsl_stats_mean(Vect, 1, Size);
+	printf("%f\t", Mean);
+}
+
+
+void PrintVectVar(double* Vect, int Size)
+{
+	double Var;
+	Var = gsl_stats_variance(Vect, 1, Size);
+	printf("%f\t", Var);
+}
+
 void PrintVectMeanVar(double* Vect, int Size)
 {
-	double Mean, Var;
-	Mean = gsl_stats_mean(Vect, 1, Size);
-	Var = gsl_stats_variance(Vect, 1, Size);
-	printf("%f\t%f\t", Mean, Var);
+	PrintVectMean(Vect, Size);
+	PrintVectVar(Vect, Size);
 }
+
 
 void OuputReg(OPTIONS* Opt, INDIVIDUAL **Pop, int Size)
 {
@@ -685,12 +699,12 @@ void OuputReg(OPTIONS* Opt, INDIVIDUAL **Pop, int Size)
 	for(Index=0;Index<Size;Index++)
 		X[Index] = Pop[Index]->Phenotype;
 	PhenotypeFullSD = gsl_stats_sd(X, 1, Size);
-	
+
 	for(Index=0;Index<Size;Index++)
 	{
 		X[Index] = Pop[Index]->Phenotype;
 		Y[Index] = Pop[Index]->Fitness;
-		
+
 		if(X[Index] > Opt->FitnessPar[0])
 			X[Index] = Opt->FitnessPar[0] - (X[Index] - Opt->FitnessPar[0]);
 
@@ -700,7 +714,7 @@ void OuputReg(OPTIONS* Opt, INDIVIDUAL **Pop, int Size)
 	R2 = gsl_stats_correlation(X, 1, Y, 1, Size);
 	R2 = R2 * R2;
 
-    printf("%f\t%f\t%f\t%f\t", Int, Slope, R2, Slope * PhenotypeFullSD);
+    printf("%f\t%f\t", Slope, Slope * PhenotypeFullSD);
 }
 
 
@@ -714,31 +728,26 @@ void	Output(OPTIONS* Opt, int Itter, POP* Pop)
 	printf("%d\t", Itter);
 
 	GetPhenotypeVect(Opt, Pop, TVect);
-	PrintVectMeanVar(TVect, Opt->PopSize);
+	PrintVectMean(TVect, Opt->PopSize);
 	PhenotypeMean = gsl_stats_mean(TVect, 1, Opt->PopSize);
 	PhenotypeVar = gsl_stats_variance(TVect, 1, Opt->PopSize);
 	printf("%f\t", PhenotypeMean / sqrt(PhenotypeVar));
 
 	GetGenotypeVect(Opt, Pop, TVect);
-	PrintVectMeanVar(TVect, Opt->PopSize);
+
+	PrintVectVar(TVect, Opt->PopSize);
 	GenotypeVar = gsl_stats_variance(TVect, 1, Opt->PopSize);
 
 	GetFitnessVect(Opt, Pop, TVect);
-	PrintVectMeanVar(TVect, Opt->PopSize);
 
 	GetEnvVect(Opt, Pop, TVect);
-	PrintVectMeanVar(TVect, Opt->PopSize);
 	EnvVar = gsl_stats_variance(TVect, 1, Opt->PopSize);
 
 	printf("%d\t", Pop->NoSPop);
-	printf("%f\t", GenotypeVar / (GenotypeVar + EnvVar));
 
 
-	printf("%f\t%f\t", Opt->FitnessPar[0], Opt->FitnessPar[1]);
-
-	OuputReg(Opt, Pop->Pop, Opt->PopSize);
 	OuputReg(Opt, Pop->SPop, Pop->NoSPop);
-	
+
 	printf("%f\t", sqrt((GenotypeVar*GenotypeVar) / Opt->MuteVar));
 
 
@@ -754,9 +763,9 @@ void RunSim(OPTIONS* Opt)
 	POP *CPop, *NPop;
 
 	CPop = CreatePop(Opt);
-	NPop = CreatePop(Opt);	
+	NPop = CreatePop(Opt);
 
-	printf("Generation\tPhenotype Mean\tPhenotype Var\tPhenotype Ratio\tGenotype Mean\tGenotype Var\tFitness Mean\tFitness Var\tEnv Mean\tEnv Var\tP Survived\tHeritability\tFitness Function Mean\tFitness Function SD\tAll Intercept\tAll Slope\tAll R2\tAll Standardised Slope\tSurviving Intercept\tSurviving Slope\tSurviving R2\tSurviving Standardised Slope\tw\t");
+	printf("Generation\tPhenotype Mean\tPhenotype Ratio\tGenotype Var\tP Survived\tSurviving Slope\tSurviving Standardised Slope\tw\t");
 
 	printf("\n");
 
@@ -789,7 +798,7 @@ double GetWinLastHalf(DATA_WINDOW* DWin)
 	int Start;
 
 	Start = DWin->Size / 2;
-	
+
 	Mean = gsl_stats_mean(&DWin->Vect[Start], 1, Start);
 
 	return Mean;
@@ -831,7 +840,7 @@ double GetMutVar(OPTIONS* Opt, POP *CPop, POP *NPop, int Itters, double X)
 OPT_STRUCT*	CreateOptStr(OPTIONS *Opt)
 {
 	OPT_STRUCT* OptStr;
-	
+
 	OptStr = (OPT_STRUCT*)SMalloc(sizeof(OPT_STRUCT));
 
 	OptStr->Opt = Opt;
@@ -870,10 +879,10 @@ double	OptFun(unsigned N, const double *x, double *grad, void *Data)
 
 double GetAnalyticalFitSD(OPTIONS *Opt)
 {
-	double Num, Dom; 
+	double Num, Dom;
 
 	Num = Opt->PheotypeVar * Opt->Heritabitlity;
-	Dom = Opt->PheotypeVar * (1.0 - Opt->Heritabitlity); 
+	Dom = Opt->PheotypeVar * (1.0 - Opt->Heritabitlity);
 	Dom = sqrt(Opt->MuteVarScalar * Dom);
 
 	return Num / Dom;
@@ -881,7 +890,7 @@ double GetAnalyticalFitSD(OPTIONS *Opt)
 
 void NLOptParam(OPTIONS *Opt)
 {
-#ifndef NLOPT_BUILD 
+#ifndef NLOPT_BUILD
 	if(Opt->InitFitnessSD != -1)
 	{
 		Opt->FitnessPar[1] = Opt->InitFitnessSD;
@@ -890,7 +899,7 @@ void NLOptParam(OPTIONS *Opt)
 
 	Opt->FitnessPar[1] = GetAnalyticalFitSD(Opt);
 	return;
-#else 
+#else
 
 	double *Vect, X;
 	double Min, Max;
@@ -914,7 +923,7 @@ void NLOptParam(OPTIONS *Opt)
 
 	Min = 1e-2;
 	Max = 100.0;
-	
+
 	nlopt_set_lower_bounds(NLOpt, &Min);
 	nlopt_set_upper_bounds(NLOpt, &Max);
 
