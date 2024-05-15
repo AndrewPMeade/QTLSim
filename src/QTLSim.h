@@ -39,6 +39,13 @@
 #define GENETIC_TARGET 0.5
 #define NO_ITTERS_PER_TEST 10000
 
+#define MUT_RATE_PER_QTL 0.0002 // (2*10^-4)
+
+#define RECOMB_BIAS 0.9
+
+#define RECOMB_POISSON 1.0
+
+
 //#define NO_ENV_VAR // Environmental variance 
 
 typedef enum
@@ -110,6 +117,8 @@ typedef struct
 
 	double InitFitnessSD;
 
+	double MutationRatePerGamete;
+
 //	int BreedingT;
 } OPTIONS;
 
@@ -123,5 +132,15 @@ typedef struct
 	double Taget;
 
 } OPT_STRUCT;
+
+
+double  CaclGenotype(OPTIONS* Opt, INDIVIDUAL* Ind);
+POP* CreatePop(OPTIONS* Opt);
+void PopFitness(OPTIONS *Opt, int Itter, POP *Pop);
+void NewPop(OPTIONS* Opt, POP *CPop, POP *NPop);
+void MutatePop(OPTIONS* Opt, POP* Pop);
+
+
+
 
 #endif

@@ -56,7 +56,7 @@ void SetStandardisePhenotype(OPTIONS* Opt, int argc, char** argv);
 void SetOptimumMoveType(OPTIONS* Opt, int argc, char** argv);
 void SetAssortativeMating(OPTIONS* Opt, int argc, char** argv);
 void SetInitFitnessSD(OPTIONS* Opt, int argc, char** argv);
-
+void SetMutationRatePerGamete(OPTIONS* Opt, int argc, char** argv);
 
 
 
@@ -86,6 +86,7 @@ static CMD CMD_LIST[] = {
     {"OptimumMoveType", SetOptimumMoveType, NULL},
 //    {"AssortativeMating", SetAssortativeMating, NULL},
 //    {"InitFitnessSD", SetInitFitnessSD, NULL},
+    {"MutationRatePerGamete", SetMutationRatePerGamete, NULL},
     {NULL, NULL, NULL}       
 };
 

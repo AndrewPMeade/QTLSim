@@ -18,6 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\DataWindow.h" />
+    <ClInclude Include="src\GenLib.h" />
+    <ClInclude Include="src\PassOptionFile.h" />
+    <ClInclude Include="src\QTLSim.h" />
+    <ClInclude Include="src\RandLib.h" />
+    <ClInclude Include="src\TestModel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\DataWindow.c" />
+    <ClCompile Include="src\GenLib.c" />
+    <ClCompile Include="src\PassOptionFile.c" />
+    <ClCompile Include="src\QTLSim.c" />
+    <ClCompile Include="src\RandLib.c" />
+    <ClCompile Include="src\TestModel.c" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -132,20 +148,6 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);gsl.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\DataWindow.c" />
-    <ClCompile Include="src\GenLib.c" />
-    <ClCompile Include="src\PassOptionFile.c" />
-    <ClCompile Include="src\QTLSim.c" />
-    <ClCompile Include="src\RandLib.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\DataWindow.h" />
-    <ClInclude Include="src\GenLib.h" />
-    <ClInclude Include="src\PassOptionFile.h" />
-    <ClInclude Include="src\QTLSim.h" />
-    <ClInclude Include="src\RandLib.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

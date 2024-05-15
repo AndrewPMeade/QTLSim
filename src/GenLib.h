@@ -27,6 +27,8 @@
 #ifndef GENLIB
 #define GENLIB
 
+#include <stdio.h>
+
 #pragma warning(disable : 4996)
 
 #ifndef TRUE

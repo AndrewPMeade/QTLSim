@@ -37,6 +37,7 @@
 #include "RandLib.h"
 #include "DataWindow.h"
 #include "PassOptionFile.h"
+#include "TestModel.h"
 
 
 double RandNormalVar(gsl_rng* rng, double Var)
@@ -117,6 +118,8 @@ void SetDefOptions(OPTIONS* Opt)
 	Opt->AssortativeMating = -1;
 
 	Opt->InitFitnessSD = -1;
+
+	Opt->MutationRatePerGamete = MUT_RATE_PER_QTL;
 }
 
 OPTIONS* CreateOptionsFile(int argc, char** argv)
@@ -206,6 +209,8 @@ void PrintOptions(OPTIONS* Opt)
 */
 
 	printf("InitFitnessSD:\t%f\n", Opt->InitFitnessSD);
+
+	printf("MutationRatePerGamete\t%f\n", Opt->MutationRatePerGamete);
 
 	fflush(stdout);
 }
@@ -323,6 +328,9 @@ double  CaclGenotype(OPTIONS* Opt, INDIVIDUAL* Ind)
 
 	}
 
+	// to controle for QTL
+//	Genotype  = Genotype / Opt->NoQTL;
+
 #ifdef QTL_AVE
 		Genotype  = Genotype / (Opt->NoQTL * Opt->Ploidy);
 #endif
@@ -365,7 +373,7 @@ void MutateIndividualChrNoPoisson(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 	}
 }
 */
-void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
+void MutateIndividualChrNoOld(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 {
 	int Index;
 	double Scale;
@@ -376,22 +384,57 @@ void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 		Scale = sqrt(2.0);
 
 	for(Index=0;Index<Opt->NoQTL;Index++)
+		Ind->Genome[ChrNo][Index] += (RandNormalVar(Opt->rng, Opt->MuteVar) / Scale) * sqrt(Opt->NoQTL);
+}
+/*
+void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
+{
+	int Pos;
+	double MutVar;
+
+	if(gsl_rng_uniform(Opt->rng) > Opt->NoQTL * Opt->MutationRatePerGamete)
+		return;
+
+	Pos = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL);
+
+	MutVar = Opt->MuteVarScalar / (Opt->Ploidy * Opt->NoQTL * Opt->MutationRatePerGamete);
+	MutVar = MutVar * Opt->EnvVar;
+
+	Ind->Genome[ChrNo][Pos] += RandNormalVar(Opt->rng, MutVar);
+}
+*/
+
+void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
+{
+	int Pos, No;
+	double MutVar;
+
+	No = gsl_ran_poisson(Opt->rng, Opt->NoQTL * Opt->MutationRatePerGamete);
+
+
+//	if(gsl_rng_uniform(Opt->rng) > Opt->NoQTL * Opt->MutationRatePerGamete)
+//		return;
+	
+	MutVar = Opt->MuteVarScalar / (Opt->Ploidy * Opt->NoQTL * Opt->MutationRatePerGamete);
+	MutVar = MutVar * Opt->EnvVar;
+
+	while(No > 0)
 	{
-#ifdef QTL_AVE
-		Ind->Genome[ChrNo][Index] += RandNormalVar(Opt->rng, Opt->MuteVar) * Scale;
-#else
-		Ind->Genome[ChrNo][Index] += RandNormalVar(Opt->rng, Opt->MuteVar) / Scale;
-#endif
+		Pos = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL);
+		Ind->Genome[ChrNo][Pos] += RandNormalVar(Opt->rng, MutVar);
+		No--;
 	}
 }
+
 
 void MutateIndividual(OPTIONS* Opt, INDIVIDUAL* Ind)
 {
 	int Index;
 
 	for(Index=0;Index<Opt->Ploidy;Index++)
-//		MutateIndividualChrNoPoisson(Opt, Index, Ind);
 		MutateIndividualChrNo(Opt, Index, Ind);
+//		MutateIndividualChrNoPoisson(Opt, Index, Ind);
+//		MutateIndividualChrNoOld(Opt, Index, Ind);
 }
 
 
@@ -490,6 +533,198 @@ int ValidDiploidParents(OPTIONS* Opt, INDIVIDUAL *P1, INDIVIDUAL *P2, double Phe
 
 	return AcceptMatting(P1->Phenotype, P2->Phenotype, PhenotypeSD * Opt->AssortativeMating);
 }
+/*
+void Recombination(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
+{
+	int Index, Chr1, Chr2;
+
+	for(Index=0;Index<Opt->NoQTL;Index++)
+	{
+		Chr1 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
+		CIn->Genome[0][Index] = P1->Genome[Chr1][Index];
+
+		Chr2 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
+		CIn->Genome[1][Index] = P2->Genome[Chr2][Index];
+	}
+}
+*/
+
+void Recombination(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
+{
+	int Index, Chr1, Chr2;
+
+	// P1 and P2 are randomly assigned, so it does not matter. 
+
+	for(Index=0;Index<Opt->NoQTL;Index++)
+	{
+		Chr1 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
+		CIn->Genome[0][Index] = P1->Genome[Chr1][Index];
+
+		Chr2 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
+		CIn->Genome[1][Index] = P2->Genome[Chr2][Index];
+	}
+}
+
+void RecombinationUnEnven(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
+{
+	int Index;
+	double *P1D, *P1R, *P2D, *P2R;
+	
+	P1D = P1->Genome[0];
+	P1R = P1->Genome[1];
+	if(gsl_rng_uniform(Opt->rng) < 0.5)
+	{
+		P1D = P1->Genome[1];
+		P1R = P1->Genome[0];
+	}
+
+	P2D = P2->Genome[0];
+	P2R = P2->Genome[1];
+	if(gsl_rng_uniform(Opt->rng) < 0.5)
+	{
+		P2D = P2->Genome[1];
+		P2R = P2->Genome[0];
+	}
+
+	// P1 and P2 are randomly assigned, so it does not matter. 
+	for(Index=0;Index<Opt->NoQTL;Index++)
+	{
+
+		if(gsl_rng_uniform(Opt->rng) < RECOMB_BIAS)
+			CIn->Genome[0][Index] = P1D[Index];
+		else
+			CIn->Genome[0][Index] = P1R[Index];
+
+
+		if(gsl_rng_uniform(Opt->rng) < RECOMB_BIAS)
+			CIn->Genome[1][Index] = P2D[Index];
+		else
+			CIn->Genome[1][Index] = P2R[Index];
+
+//		Chr1 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
+//		CIn->Genome[0][Index] = P1->Genome[Chr1][Index];
+
+//		Chr2 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
+//		CIn->Genome[1][Index] = P2->Genome[Chr2][Index];
+	}
+}
+
+void RecombinationChr1Point(OPTIONS* Opt, double *In, double *P1, double *P2)
+{
+	double *CP;
+	int Index, Point;
+
+	CP = P1;
+	if(gsl_rng_uniform(Opt->rng) < 0.5)
+		CP = P2;
+
+	Point = 0;
+	if(Opt->NoQTL > 2)
+		Point = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL-1);
+
+	for(Index=0;Index<Opt->NoQTL;Index++)
+	{
+		In[Index] = CP[Index];
+
+		if(Index == Point)
+		{
+			if(CP == P1)
+				CP = P2;
+			else
+				CP = P1;
+		}
+	}
+}
+
+void Recombination1Point(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
+{
+	RecombinationChr1Point(Opt, CIn->Genome[0], P1->Genome[0], P1->Genome[1]);
+	RecombinationChr1Point(Opt, CIn->Genome[1], P2->Genome[0], P2->Genome[1]);
+}
+
+int PointInMap(int *Map, int Point, int Size)
+{
+	int Index;
+	for(Index=0;Index<Size;Index++)
+		if(Point == Map[Index])
+			return TRUE;
+
+	return FALSE;
+}
+
+int IntComp(const void *A, const void  *B) 
+{
+   return ( *(int*)A - *(int*)B);
+}
+
+int*	CreateCombMap(OPTIONS* Opt, int *NoPoints)
+{
+	int Index;
+	int *Map;
+
+	*NoPoints = gsl_ran_poisson(Opt->rng, RECOMB_POISSON);
+
+	if(*NoPoints == 0 || *NoPoints >= Opt->NoQTL)
+	{
+		Map = (int*)SMalloc(sizeof(int));
+		Map[0] = Opt->NoQTL;
+		return Map;
+	}
+
+	Map = (int*)SMalloc(sizeof(int) * (*NoPoints+1));
+	for(Index=0;Index<*NoPoints;Index++)
+	{
+		do
+		{
+			Map[Index] = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL-1);
+		} while(PointInMap(Map, Map[Index], Index) == TRUE);
+	}
+
+	qsort(Map, *NoPoints, sizeof(int), IntComp);
+
+	Map[*NoPoints] = 0; 
+
+	return Map;
+}
+
+void RecombinationPoissonChr(OPTIONS* Opt, double *Chr, double *P1, double *P2)
+{
+	int *CombMap;
+	int NoCombMap;
+	double *CP;
+	int Index, PointIndex;
+
+	CombMap = CreateCombMap(Opt, &NoCombMap);
+
+	CP = P1;
+	if(gsl_rng_uniform(Opt->rng) < 0.5)
+		CP = P2;
+
+	PointIndex = 0;
+	for(Index=0;Index<Opt->NoQTL;Index++)
+	{
+		Chr[Index] = CP[Index];
+
+		if(Index == CombMap[PointIndex])
+		{
+			if(CP == P1)
+				CP = P2;
+			else
+				CP = P1;
+		}
+	}
+
+	free(CombMap);
+}
+
+void RecombinationPoisson(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
+{
+
+	RecombinationPoissonChr(Opt, CIn->Genome[0], P1->Genome[0], P1->Genome[1]);
+	RecombinationPoissonChr(Opt, CIn->Genome[1], P2->Genome[0], P2->Genome[1]);
+}	
+
+
 
 void NewIn(OPTIONS* Opt, POP *CPop, INDIVIDUAL *CIn, double PhenotypeSD)
 {
@@ -511,6 +746,12 @@ void NewIn(OPTIONS* Opt, POP *CPop, INDIVIDUAL *CIn, double PhenotypeSD)
 //		Opt->BreedingT++;
 	} while(ValidDiploidParents(Opt, P1, P2, PhenotypeSD) == FALSE);
 
+
+//	Recombination(Opt, CIn, P1, P2);
+//	RecombinationUnEnven(Opt, CIn, P1, P2);
+//	Recombination1Point(Opt, CIn, P1, P2);
+	RecombinationPoisson(Opt, CIn, P1, P2);
+	return;
 
 	CNo = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
 	memcpy(CIn->Genome[0], P1->Genome[CNo], sizeof(double)*Opt->NoQTL);
@@ -761,6 +1002,9 @@ void RunSim(OPTIONS* Opt)
 {
 	int Itter;
 	POP *CPop, *NPop;
+
+//	TestModel(Opt);
+
 
 	CPop = CreatePop(Opt);
 	NPop = CreatePop(Opt);
