@@ -986,6 +986,8 @@ void	Output(OPTIONS* Opt, int Itter, POP* Pop)
 
 	printf("%d\t", Pop->NoSPop);
 
+	printf("%f\t%f\t", Opt->FitnessPar[0], Opt->FitnessPar[1]);
+
 
 	OuputReg(Opt, Pop->SPop, Pop->NoSPop);
 
@@ -1009,7 +1011,7 @@ void RunSim(OPTIONS* Opt)
 	CPop = CreatePop(Opt);
 	NPop = CreatePop(Opt);
 
-	printf("Generation\tPhenotype Mean\tPhenotype Ratio\tGenotype Var\tP Survived\tSurviving Slope\tSurviving Standardised Slope\tw\t");
+	printf("Generation\tPhenotype Mean\tPhenotype Ratio\tGenotype Var\tP Survived\tFitness Function Mean\tFitness Function SD\tSurviving Slope\tSurviving Standardised Slope\tw\t");
 
 	printf("\n");
 
