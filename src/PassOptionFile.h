@@ -85,7 +85,7 @@ static CMD CMD_LIST[] = {
     {"StandardisePhenotype", SetStandardisePhenotype, NULL},
     {"OptimumMoveType", SetOptimumMoveType, NULL},
 //    {"AssortativeMating", SetAssortativeMating, NULL},
-//    {"InitFitnessSD", SetInitFitnessSD, NULL},
+    {"InitFitnessSD", SetInitFitnessSD, NULL},
     {"MutationRatePerGamete", SetMutationRatePerGamete, NULL},
     {NULL, NULL, NULL}       
 };
