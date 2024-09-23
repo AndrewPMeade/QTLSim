@@ -57,7 +57,7 @@ void SetOptimumMoveType(OPTIONS* Opt, int argc, char** argv);
 void SetAssortativeMating(OPTIONS* Opt, int argc, char** argv);
 void SetInitFitnessSD(OPTIONS* Opt, int argc, char** argv);
 void SetMutationRatePerGamete(OPTIONS* Opt, int argc, char** argv);
-
+void SetRecombinationPoissonMean(OPTIONS* Opt, int argc, char** argv);
 
 
 typedef struct
@@ -87,6 +87,7 @@ static CMD CMD_LIST[] = {
 //    {"AssortativeMating", SetAssortativeMating, NULL},
     {"InitFitnessSD", SetInitFitnessSD, NULL},
     {"MutationRatePerGamete", SetMutationRatePerGamete, NULL},
+	{"RecombinationPoissonMean", SetRecombinationPoissonMean, NULL},
     {NULL, NULL, NULL}       
 };
 

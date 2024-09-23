@@ -43,7 +43,7 @@
 
 #define RECOMB_BIAS 0.9
 
-#define RECOMB_POISSON 1.0
+#define RECOMB_POISSON_DEFAULT 1.0
 
 
 //#define NO_ENV_VAR // Environmental variance 
@@ -118,6 +118,8 @@ typedef struct
 	double InitFitnessSD;
 
 	double MutationRatePerGamete;
+
+	double RecombPoissonMean;
 
 //	int BreedingT;
 } OPTIONS;

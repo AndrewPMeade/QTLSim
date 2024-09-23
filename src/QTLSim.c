@@ -120,6 +120,8 @@ void SetDefOptions(OPTIONS* Opt)
 	Opt->InitFitnessSD = -1;
 
 	Opt->MutationRatePerGamete = MUT_RATE_PER_QTL;
+
+	Opt->RecombPoissonMean = RECOMB_POISSON_DEFAULT;
 }
 
 OPTIONS* CreateOptionsFile(int argc, char** argv)
@@ -211,6 +213,8 @@ void PrintOptions(OPTIONS* Opt)
 	printf("InitFitnessSD:\t%f\n", Opt->InitFitnessSD);
 
 	printf("MutationRatePerGamete\t%f\n", Opt->MutationRatePerGamete);
+
+	printf("RecombinationPoissonMean\t%f\n", Opt->RecombPoissonMean);
 
 	fflush(stdout);
 }
@@ -662,7 +666,7 @@ int*	CreateCombMap(OPTIONS* Opt, int *NoPoints)
 	int Index;
 	int *Map;
 
-	*NoPoints = gsl_ran_poisson(Opt->rng, RECOMB_POISSON);
+	*NoPoints = gsl_ran_poisson(Opt->rng, Opt->RecombPoissonMean);
 
 	if(*NoPoints == 0 || *NoPoints >= Opt->NoQTL)
 	{

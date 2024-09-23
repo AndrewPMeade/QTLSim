@@ -283,6 +283,22 @@ void SetMutationRatePerGamete(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
+
+void SetRecombinationPoissonMean(OPTIONS* Opt, int argc, char** argv)
+{
+	TestNoArg(argv[0], argc, 2);
+	TestDouble(argv[0], argv[1]);
+	
+	Opt->RecombPoissonMean = atof(argv[1]);
+
+	if(Opt->RecombPoissonMean < 0 )
+	{
+		printf("RecombPoissonMean must be >0\n");
+		exit(1);
+	}
+}
+
+
 void PassOptFile(OPTIONS* Opt, char* FName)
 {
 	TEXTFILE *TF;
