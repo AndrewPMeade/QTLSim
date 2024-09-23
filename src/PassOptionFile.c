@@ -54,7 +54,7 @@ void TestDouble(char *Cmd, char* Str)
 {
 	if(IsValidDouble(Str) == FALSE)
 	{
-		printf("command %s: %s is not a valid int", Cmd, Str);
+		printf("command %s: %s is not a valid float", Cmd, Str);
 		exit(1);
 	}
 }
