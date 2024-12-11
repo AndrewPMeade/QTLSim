@@ -24,20 +24,11 @@
     <ClInclude Include="src\RandLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\DataWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\GenLib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\TestModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DataWindow.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\GenLib.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,9 +39,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\RandLib.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TestModel.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

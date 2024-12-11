@@ -19,20 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DataWindow.h" />
     <ClInclude Include="src\GenLib.h" />
     <ClInclude Include="src\PassOptionFile.h" />
     <ClInclude Include="src\QTLSim.h" />
     <ClInclude Include="src\RandLib.h" />
-    <ClInclude Include="src\TestModel.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DataWindow.c" />
     <ClCompile Include="src\GenLib.c" />
     <ClCompile Include="src\PassOptionFile.c" />
     <ClCompile Include="src\QTLSim.c" />
     <ClCompile Include="src\RandLib.c" />
-    <ClCompile Include="src\TestModel.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

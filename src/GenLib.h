@@ -24,6 +24,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>
 *
 */
+
+// General library taken from BayesTraits. 
+
 #ifndef GENLIB
 #define GENLIB
 

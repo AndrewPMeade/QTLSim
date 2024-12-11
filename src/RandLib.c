@@ -40,6 +40,7 @@
 
 #include "RandLib.h"
 
+// Get a process ID
 unsigned long	GetProcID(void)
 {
 	#ifdef _WIN32
@@ -49,7 +50,7 @@ unsigned long	GetProcID(void)
 	#endif
 }
 
-
+// Reverse the bits in a long
 unsigned long ReverseUSLong(unsigned long x)
 {
 	unsigned long h;
@@ -66,7 +67,7 @@ unsigned long ReverseUSLong(unsigned long x)
 	return h;
 }
 
-
+// Get a random seed based on the time and process ID
 unsigned long	GetSeed(void)
 {
 	unsigned long Seed;

@@ -29,17 +29,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#ifdef NLOPT_BUILD
-	#include <nlopt.h>
-#endif
 
 #include "QTLSim.h"
 #include "RandLib.h"
-#include "DataWindow.h"
 #include "PassOptionFile.h"
-#include "TestModel.h"
 
-
+// Draw a random value from a normal distribution, centred at 0 with the specified variance. 
 double RandNormalVar(gsl_rng* rng, double Var)
 {
 	// both are the same
@@ -47,6 +42,7 @@ double RandNormalVar(gsl_rng* rng, double Var)
 	return gsl_ran_gaussian(rng, sqrt(Var));
 }
 
+// Allocate and set the mean and SD of the fitness function. 
 double* SetFitnessNormalParam(double Mean, double SD)
 {
 	double *Param;
@@ -72,6 +68,7 @@ void CaclOptParm(OPTIONS *Opt)
 //	Opt->MuteVar = 1.0 / 1000.0;
 }
 
+// Allocate additional options parameters
  void AllocAddtionalOptions(OPTIONS* Opt)
  {
 	 CaclOptParm(Opt);
@@ -84,6 +81,8 @@ void CaclOptParm(OPTIONS *Opt)
 	Opt->Y = (double*)SMalloc(sizeof(double) * Opt->PopSize);
  }
 
+
+ // Set the default options
 void SetDefOptions(OPTIONS* Opt)
 {
 	Opt->NoGenerations = 20000;
@@ -124,6 +123,8 @@ void SetDefOptions(OPTIONS* Opt)
 	Opt->RecombPoissonMean = RECOMB_POISSON_DEFAULT;
 }
 
+
+// Create options and read them form the file. 
 OPTIONS* CreateOptionsFile(int argc, char** argv)
 {
 	OPTIONS *Opt;
@@ -149,6 +150,7 @@ void FreeOptions(OPTIONS* Opt)
 	free(Opt);
 }
 
+// Print the current options. 
 void PrintOptions(OPTIONS* Opt)
 {
 	printf("Version:\t%f\n", VERSION);
@@ -219,6 +221,7 @@ void PrintOptions(OPTIONS* Opt)
 	fflush(stdout);
 }
 
+// Set the environment variance of a newly created individual  
 void SetIndividualEnv(OPTIONS* Opt, INDIVIDUAL* Ind)
 {
 #ifdef NO_ENV_VAR
@@ -232,7 +235,7 @@ void SetIndividualEnv(OPTIONS* Opt, INDIVIDUAL* Ind)
 		Ind->Env = 0.0;
 }
 
-
+// Create an individual 
 INDIVIDUAL* CreateIndividual(OPTIONS* Opt)
 {
 	INDIVIDUAL* Ind;
@@ -255,6 +258,7 @@ INDIVIDUAL* CreateIndividual(OPTIONS* Opt)
 	return Ind;
 }
 
+// Free the memory for an individual
 void FreeIndividual(INDIVIDUAL* Ind)
 {
 	free(Ind->Genome[0]);
@@ -262,11 +266,13 @@ void FreeIndividual(INDIVIDUAL* Ind)
 	free(Ind);
 }
 
+// Write an individual to the screen, debugging only
 void DumpIndividual(INDIVIDUAL* Ind)
 {
 	printf("%f\t%f\t%f\t%f\t%f\t%f\n", Ind->Fitness, Ind->Phenotype, Ind->Genotype, Ind->Env, Ind->Genome[0][0], Ind->Genome[0][1]);
 }
 
+// Write the population to the screen, debugging only
 void DumpPop(OPTIONS* Opt, POP *Pop)
 {
 	int Index;
@@ -275,7 +281,7 @@ void DumpPop(OPTIONS* Opt, POP *Pop)
 		DumpIndividual(Pop->Pop[Index]);
 }
 
-
+// Allocate and create the initial population from the specified options. 
 POP* CreatePop(OPTIONS* Opt)
 {
 	POP *Pop;
@@ -296,6 +302,7 @@ POP* CreatePop(OPTIONS* Opt)
 	return Pop;
 }
 
+// Free the memory for a given population. 
 void FreePop(OPTIONS *Opt, POP *Pop)
 {
 	int Index;
@@ -312,6 +319,7 @@ void FreePop(OPTIONS *Opt, POP *Pop)
 
 }
 
+// Calculate the Genotype for an individual 
 double  CaclGenotype(OPTIONS* Opt, INDIVIDUAL* Ind)
 {
 	double Genotype;
@@ -342,12 +350,14 @@ double  CaclGenotype(OPTIONS* Opt, INDIVIDUAL* Ind)
 	return Genotype;
 }
 
+// Calculate the Phenotype for an individual 
 void CaclPhenotype(OPTIONS* Opt, INDIVIDUAL* Ind)
 {
 	Ind->Genotype = CaclGenotype(Opt, Ind);
 	Ind->Phenotype = Ind->Genotype + Ind->Env;
 }
 
+// Calculate the phenotype for each individual in the population.
 void CaclPopPhenotype(OPTIONS* Opt, POP* Pop)
 {
 	int Index;
@@ -362,21 +372,8 @@ void CaclPopPhenotype(OPTIONS* Opt, POP* Pop)
 	}
 
 }
-/* Opt->MuteRate is not defined.
-void MutateIndividualChrNoPoisson(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
-{
-	int NoMuts, Pos, Index;
 
-	NoMuts = gsl_ran_poisson(Opt->rng, Opt->MuteRate * Opt->NoQTL);
-
-	for(Index=0;Index<NoMuts;Index++)
-	{
-		Pos = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL);
-		ChrNo = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
-		Ind->Genome[ChrNo][Pos] += RandNormalVar(Opt->rng, Opt->MuteVar);
-	}
-}
-*/
+// Not used
 void MutateIndividualChrNoOld(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 {
 	int Index;
@@ -390,24 +387,8 @@ void MutateIndividualChrNoOld(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 	for(Index=0;Index<Opt->NoQTL;Index++)
 		Ind->Genome[ChrNo][Index] += (RandNormalVar(Opt->rng, Opt->MuteVar) / Scale) * sqrt(Opt->NoQTL);
 }
-/*
-void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
-{
-	int Pos;
-	double MutVar;
 
-	if(gsl_rng_uniform(Opt->rng) > Opt->NoQTL * Opt->MutationRatePerGamete)
-		return;
-
-	Pos = gsl_rng_uniform_int(Opt->rng, Opt->NoQTL);
-
-	MutVar = Opt->MuteVarScalar / (Opt->Ploidy * Opt->NoQTL * Opt->MutationRatePerGamete);
-	MutVar = MutVar * Opt->EnvVar;
-
-	Ind->Genome[ChrNo][Pos] += RandNormalVar(Opt->rng, MutVar);
-}
-*/
-
+// Mutate a chromosome
 void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 {
 	int Pos, No;
@@ -430,7 +411,7 @@ void MutateIndividualChrNo(OPTIONS* Opt, int ChrNo, INDIVIDUAL* Ind)
 	}
 }
 
-
+// Mutate an individual
 void MutateIndividual(OPTIONS* Opt, INDIVIDUAL* Ind)
 {
 	int Index;
@@ -441,7 +422,7 @@ void MutateIndividual(OPTIONS* Opt, INDIVIDUAL* Ind)
 //		MutateIndividualChrNoOld(Opt, Index, Ind);
 }
 
-
+// Mutate the population 
 void MutatePop(OPTIONS* Opt, POP* Pop)
 {
 	int Index;
@@ -463,6 +444,7 @@ double*	GetChr(OPTIONS* Opt, POP *CPop)
 	return CIn->Genome[gsl_rng_uniform_int(Opt->rng, Opt->Ploidy)];
 }
 
+// Find the surviving members of the population 
 void SetSurviving(OPTIONS* Opt, POP* Pop)
 {
 	INDIVIDUAL *In;
@@ -479,38 +461,7 @@ void SetSurviving(OPTIONS* Opt, POP* Pop)
 	}
 }
 
-/*
-void NewPop(OPTIONS* Opt, POP *CPop, POP *NPop)
-{
-	int IIndex, GIndex;
-	INDIVIDUAL *CIn;
-	double *Chr;
-
-	SetSurviving(Opt, CPop);
-
-	if(CPop->NoSPop == 0)
-	{
-		printf("Pop all died.\n");
-		exit(0);
-	}
-
-	for(IIndex=0;IIndex<Opt->PopSize;IIndex++)
-	{
-		CIn = NPop->Pop[IIndex];
-
-		for(GIndex=0;GIndex<Opt->Ploidy;GIndex++)
-		{
-			Chr = GetChr(Opt, CPop);
-
-//			Chr = CPop->Pop[IIndex]->Genome[GIndex];
-			memcpy(CIn->Genome[GIndex], Chr, sizeof(double)*Opt->NoQTL);
-		}
-
-		SetIndividualEnv(Opt, CIn);
-	}
-}
-*/
-
+// Not used
 int AcceptMatting(double A, double B, double MaxDiff)
 {
 	double Diff;
@@ -524,6 +475,7 @@ int AcceptMatting(double A, double B, double MaxDiff)
 	return FALSE;
 }
 
+// Not used
 int ValidDiploidParents(OPTIONS* Opt, INDIVIDUAL *P1, INDIVIDUAL *P2, double PhenotypeSD)
 {
 	if(P1 == P2)
@@ -537,22 +489,8 @@ int ValidDiploidParents(OPTIONS* Opt, INDIVIDUAL *P1, INDIVIDUAL *P2, double Phe
 
 	return AcceptMatting(P1->Phenotype, P2->Phenotype, PhenotypeSD * Opt->AssortativeMating);
 }
-/*
-void Recombination(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
-{
-	int Index, Chr1, Chr2;
 
-	for(Index=0;Index<Opt->NoQTL;Index++)
-	{
-		Chr1 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
-		CIn->Genome[0][Index] = P1->Genome[Chr1][Index];
-
-		Chr2 = gsl_rng_uniform_int(Opt->rng, Opt->Ploidy);
-		CIn->Genome[1][Index] = P2->Genome[Chr2][Index];
-	}
-}
-*/
-
+// Not used
 void Recombination(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
 {
 	int Index, Chr1, Chr2;
@@ -569,6 +507,7 @@ void Recombination(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2
 	}
 }
 
+// Not used
 void RecombinationUnEnven(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
 {
 	int Index;
@@ -613,6 +552,7 @@ void RecombinationUnEnven(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVID
 	}
 }
 
+// Not used
 void RecombinationChr1Point(OPTIONS* Opt, double *In, double *P1, double *P2)
 {
 	double *CP;
@@ -640,12 +580,14 @@ void RecombinationChr1Point(OPTIONS* Opt, double *In, double *P1, double *P2)
 	}
 }
 
+// Not used
 void Recombination1Point(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
 {
 	RecombinationChr1Point(Opt, CIn->Genome[0], P1->Genome[0], P1->Genome[1]);
 	RecombinationChr1Point(Opt, CIn->Genome[1], P2->Genome[0], P2->Genome[1]);
 }
 
+// Test if a recombination point is already in use
 int PointInMap(int *Map, int Point, int Size)
 {
 	int Index;
@@ -656,11 +598,13 @@ int PointInMap(int *Map, int Point, int Size)
 	return FALSE;
 }
 
+// Compare two integers for sorting. 
 int IntComp(const void *A, const void  *B) 
 {
    return ( *(int*)A - *(int*)B);
 }
 
+// Crate a map of recombination locations
 int*	CreateCombMap(OPTIONS* Opt, int *NoPoints)
 {
 	int Index;
@@ -691,6 +635,7 @@ int*	CreateCombMap(OPTIONS* Opt, int *NoPoints)
 	return Map;
 }
 
+// Crate a map of recombination locations, using equally spaced points.
 int*	CreateEqualCombMap(OPTIONS* Opt, int *NoPoints)
 {
 	int Index;
@@ -718,6 +663,7 @@ int*	CreateEqualCombMap(OPTIONS* Opt, int *NoPoints)
 	return Map;
 }
 
+// Crate a gamete from a parent, using a number of recombination points, drawn from a Poisson
 void RecombinationPoissonChr(OPTIONS* Opt, double *Chr, double *P1, double *P2)
 {
 	int *CombMap;
@@ -750,15 +696,14 @@ void RecombinationPoissonChr(OPTIONS* Opt, double *Chr, double *P1, double *P2)
 	free(CombMap);
 }
 
+// Crate a gamete based on a number of recombination events
 void RecombinationPoisson(OPTIONS* Opt, INDIVIDUAL *CIn, INDIVIDUAL *P1, INDIVIDUAL *P2)
 {
-
 	RecombinationPoissonChr(Opt, CIn->Genome[0], P1->Genome[0], P1->Genome[1]);
 	RecombinationPoissonChr(Opt, CIn->Genome[1], P2->Genome[0], P2->Genome[1]);
 }	
 
-
-
+// Crate a new induvial 
 void NewIn(OPTIONS* Opt, POP *CPop, INDIVIDUAL *CIn, double PhenotypeSD)
 {
 	int CNo;
@@ -793,6 +738,8 @@ void NewIn(OPTIONS* Opt, POP *CPop, INDIVIDUAL *CIn, double PhenotypeSD)
 	memcpy(CIn->Genome[1], P2->Genome[CNo], sizeof(double)*Opt->NoQTL);
 }
 
+
+// Test if the population has died.
 int DeadPopulation(OPTIONS *Opt, int PopSize)
 {
 	if(Opt->Ploidy == 1 && PopSize == 0)
@@ -804,6 +751,7 @@ int DeadPopulation(OPTIONS *Opt, int PopSize)
 	return FALSE;
 }
 
+// Crate a new population form the old. 
 void NewPop(OPTIONS* Opt, POP *CPop, POP *NPop)
 {
 	int IIndex;
@@ -838,8 +786,7 @@ void NewPop(OPTIONS* Opt, POP *CPop, POP *NPop)
 	}
 }
 
-
-
+// Calculate the fitness of an individual 
 void Fitness(OPTIONS *Opt, INDIVIDUAL *Ind, double PhenotypeSD)
 {
 	double Phenotype;
@@ -859,6 +806,7 @@ void Fitness(OPTIONS *Opt, INDIVIDUAL *Ind, double PhenotypeSD)
 	}
 }
 
+// Move the fitness function mean, if appropriate.
 void SetFitnessMean(OPTIONS *Opt,POP *Pop)
 {
 	double Mean, SD;
@@ -883,6 +831,7 @@ void SetFitnessMean(OPTIONS *Opt,POP *Pop)
 		Opt->FitnessPar[0] = Opt->FitnessPar[0] + Opt->MoveFitnessSD;
 }
 
+// Calculate the fitness of the population 
 void PopFitness(OPTIONS *Opt, int Itter, POP *Pop)
 {
 	int Index;
@@ -894,9 +843,6 @@ void PopFitness(OPTIONS *Opt, int Itter, POP *Pop)
 	if(Opt->StandardisePhenotype == TRUE)
 		PhenotypeSD = gsl_stats_sd(Pop->TVect, 1, Opt->PopSize);
 
-
-//	PhenotypeSD = gsl_stats_sd(Pop->TVect, 1, Opt->PopSize);
-
 	if(Itter >= Opt->MoveFitnessSDGen && Opt->MoveFitnessSDGen != -1)
 		SetFitnessMean(Opt, Pop);
 
@@ -905,6 +851,8 @@ void PopFitness(OPTIONS *Opt, int Itter, POP *Pop)
 		Fitness(Opt, Pop->Pop[Index], PhenotypeSD);
 }
 
+
+// Get a vector of Phenotypes 
 void GetPhenotypeVect(OPTIONS* Opt,POP* Pop,double *Vect)
 {
 	int Index;
@@ -913,6 +861,7 @@ void GetPhenotypeVect(OPTIONS* Opt,POP* Pop,double *Vect)
 		Vect[Index] = Pop->Pop[Index]->Phenotype;
 }
 
+// Get a vector of Genotypes 
 void GetGenotypeVect(OPTIONS* Opt,POP* Pop,double *Vect)
 {
 	int Index;
@@ -921,6 +870,7 @@ void GetGenotypeVect(OPTIONS* Opt,POP* Pop,double *Vect)
 		Vect[Index] = Pop->Pop[Index]->Genotype;
 }
 
+// Get a vector of fitnesses
 void GetFitnessVect(OPTIONS* Opt,POP* Pop,double *Vect)
 {
 	int Index;
@@ -929,6 +879,7 @@ void GetFitnessVect(OPTIONS* Opt,POP* Pop,double *Vect)
 		Vect[Index] = Pop->Pop[Index]->Fitness;
 }
 
+// Get a vector of enviroemntal varainces 
 void GetEnvVect(OPTIONS* Opt,POP* Pop,double *Vect)
 {
 	int Index;
@@ -937,6 +888,7 @@ void GetEnvVect(OPTIONS* Opt,POP* Pop,double *Vect)
 		Vect[Index] = Pop->Pop[Index]->Env;
 }
 
+// print the mean of a vector
 void PrintVectMean(double* Vect, int Size)
 {
 	double Mean;
@@ -944,7 +896,7 @@ void PrintVectMean(double* Vect, int Size)
 	printf("%f\t", Mean);
 }
 
-
+// print the variance of a vector
 void PrintVectVar(double* Vect, int Size)
 {
 	double Var;
@@ -952,13 +904,14 @@ void PrintVectVar(double* Vect, int Size)
 	printf("%f\t", Var);
 }
 
+// print the mean and varaince of a vector 
 void PrintVectMeanVar(double* Vect, int Size)
 {
 	PrintVectMean(Vect, Size);
 	PrintVectVar(Vect, Size);
 }
 
-
+// Print the regression of phenotype (x) on fitness (y), fitness if flipped if > mean of distribution
 void OuputReg(OPTIONS* Opt, INDIVIDUAL **Pop, int Size)
 {
 	double *X, *Y;
@@ -991,7 +944,7 @@ void OuputReg(OPTIONS* Opt, INDIVIDUAL **Pop, int Size)
     printf("%f\t%f\t", Slope, Slope * PhenotypeFullSD);
 }
 
-
+// Write info about current population to stdout
 void	Output(OPTIONS* Opt, int Itter, POP* Pop)
 {
 	double PhenotypeVar, PhenotypeMean, GenotypeVar, EnvVar;
@@ -1032,7 +985,7 @@ void	Output(OPTIONS* Opt, int Itter, POP* Pop)
 	fflush(stdout);
 }
 
-
+// Main loop of the simulation 
 void RunSim(OPTIONS* Opt)
 {
 	int Itter;
@@ -1071,91 +1024,7 @@ void RunSim(OPTIONS* Opt)
 	FreePop(Opt, NPop);
 }
 
-double GetWinLastHalf(DATA_WINDOW* DWin)
-{
-	double Mean;
-	int Start;
-
-	Start = DWin->Size / 2;
-
-	Mean = gsl_stats_mean(&DWin->Vect[Start], 1, Start);
-
-	return Mean;
-}
-
-double GetMutVar(OPTIONS* Opt, POP *CPop, POP *NPop, int Itters, double X)
-{
-	int Index;
-	DATA_WINDOW* DWin;
-	double *PVect;
-	double Val;
-
-	PVect = (double*)SMalloc(sizeof(double) * Opt->PopSize);
-	DWin = CreateDataWindow(Itters);
-
-	Opt->FitnessPar[1] = X;
-
-	for(Index=0;Index<Itters;Index++)
-	{
-		PopFitness(Opt, -1, CPop);
-		NewPop(Opt, CPop, NPop);
-
-		GetGenotypeVect(Opt, CPop, PVect);
-		Val = gsl_stats_variance(PVect, 1, Opt->PopSize);
-		DataWindowAdd(DWin, Val);
-
-		MutatePop(Opt, NPop);
-		swap((void**)&CPop, (void**)&NPop);
-	}
-
-	Val = GetWinLastHalf(DWin);
-
-	FreeDataWindow(DWin);
-	free(PVect);
-
-	return Val;
-}
-
-OPT_STRUCT*	CreateOptStr(OPTIONS *Opt)
-{
-	OPT_STRUCT* OptStr;
-
-	OptStr = (OPT_STRUCT*)SMalloc(sizeof(OPT_STRUCT));
-
-	OptStr->Opt = Opt;
-	OptStr->CPop = CreatePop(Opt);
-	OptStr->NPop = CreatePop(Opt);
-
-	OptStr->Itters = NO_ITTERS_PER_TEST;
-
-	return OptStr;
-}
-
-void FreeOptStr(OPT_STRUCT* OptStr)
-{
-	FreePop(OptStr->Opt, OptStr->CPop);
-	FreePop(OptStr->Opt, OptStr->NPop);
-
-	free(OptStr);
-
-}
-
-double	OptFun(unsigned N, const double *x, double *grad, void *Data)
-{
-	OPT_STRUCT* OptStr;
-	double X, Var;
-
-	OptStr = (OPT_STRUCT*)Data;
-
-	X = x[0];
-
-	Var = GetMutVar(OptStr->Opt, OptStr->CPop, OptStr->NPop, OptStr->Itters, X);
-
-	Var = (Var - OptStr->Opt->OptVarTarget) * (Var - OptStr->Opt->OptVarTarget);
-
-	return Var;
-}
-
+// Calculate the analytical fitness SD from Phenotype variance, heritability and mutations scalar. 
 double GetAnalyticalFitSD(OPTIONS *Opt)
 {
 	double Num, Dom;
@@ -1167,9 +1036,10 @@ double GetAnalyticalFitSD(OPTIONS *Opt)
 	return Num / Dom;
 }
 
+
+// A function to calculate the analytical fitness SD if not user specified
 void NLOptParam(OPTIONS *Opt)
 {
-#ifndef NLOPT_BUILD
 	if(Opt->InitFitnessSD != -1)
 	{
 		Opt->FitnessPar[1] = Opt->InitFitnessSD;
@@ -1178,57 +1048,9 @@ void NLOptParam(OPTIONS *Opt)
 
 	Opt->FitnessPar[1] = GetAnalyticalFitSD(Opt);
 	return;
-#else
-
-	double *Vect, X;
-	double Min, Max;
-	nlopt_opt NLOpt;
-	OPT_STRUCT* OptStr;
-
-	if(Opt->InitFitnessSD != -1)
-	{
-		Opt->FitnessPar[1] = Opt->InitFitnessSD;
-		return;
-	}
-
-	Opt->FitnessPar[0] = 0.0;
-
-	Vect = (double*)SMalloc(sizeof(double) * 1);
-	Vect[0] = 1.0;
-
-	nlopt_srand(gsl_rng_get(Opt->rng));
-
-	NLOpt = nlopt_create(NLOPT_LN_BOBYQA, 1);
-
-	Min = 1e-2;
-	Max = 100.0;
-
-	nlopt_set_lower_bounds(NLOpt, &Min);
-	nlopt_set_upper_bounds(NLOpt, &Max);
-
-
-	nlopt_set_xtol_rel(NLOpt, 0.001);
-	nlopt_set_maxeval(NLOpt, 500);
-
-	OptStr = CreateOptStr(Opt);
-
-//	NLOptSteper(OptStr);
-
-	nlopt_set_min_objective(NLOpt, OptFun, (void*)OptStr);
-
-
-	nlopt_optimize(NLOpt, Vect, &X);
-
-	FreeOptStr(OptStr);
-
-	Opt->FitnessPar[1] = Vect[0];
-	Opt->InitFitnessSD = Vect[0];
-
-	free(Vect);
-	nlopt_destroy(NLOpt);
-#endif
 }
 
+// Code to test a bivariate Gaussian, not used in the project. 
 void TestBivariateGaussian(OPTIONS *Opt)
 {
 	int Index;
@@ -1254,6 +1076,7 @@ void TestBivariateGaussian(OPTIONS *Opt)
 	exit(0);
 }
 
+// Main entry point
 int main(int argc, char** argv)
 {
 	OPTIONS *Opt;

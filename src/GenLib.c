@@ -25,6 +25,8 @@
 *
 */
 
+// General library taken from BayesTraits. 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

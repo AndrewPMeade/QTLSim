@@ -35,7 +35,6 @@
 typedef void (*optfun)(OPTIONS* , int, char**);
 
 
-void PrintHelp();
 void Help(OPTIONS* Opt, int argc, char** argv);
 void SetSampleNo(OPTIONS* Opt, int argc, char** argv);
 void SetPopSize(OPTIONS* Opt, int argc, char** argv);

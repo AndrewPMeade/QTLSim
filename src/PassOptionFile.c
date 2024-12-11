@@ -32,6 +32,7 @@
 #include "GenLib.h"
 #include "PassOptionFile.h"
 
+// Test if the command has the correct number of arguments 
 void TestNoArg(char *Cmd, int argc, int Expect)
 {
 	if(argc != Expect)
@@ -41,6 +42,7 @@ void TestNoArg(char *Cmd, int argc, int Expect)
 	}
 }
 
+// Test if a string is a valid integer 
 void TestInt(char *Cmd, char* Str)
 {
 	if(IsValidInt(Str) == FALSE)
@@ -50,6 +52,7 @@ void TestInt(char *Cmd, char* Str)
 	}
 }
 
+// Test if a string is a valid double
 void TestDouble(char *Cmd, char* Str)
 {
 	if(IsValidDouble(Str) == FALSE)
@@ -58,6 +61,8 @@ void TestDouble(char *Cmd, char* Str)
 		exit(1);
 	}
 }
+
+// Print the help strings
 void Help(OPTIONS* Opt, int argc, char** argv)
 {
 	int Index;
@@ -68,9 +73,9 @@ void Help(OPTIONS* Opt, int argc, char** argv)
 		printf("%s\n", CMD_LIST[Index].Cmd);
 		Index++;
 	}
-
 }
 
+// Set how often to sample the population
 void SetSampleNo(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -78,6 +83,7 @@ void SetSampleNo(OPTIONS* Opt, int argc, char** argv)
 	Opt->Sample = atoi(argv[1]);
 }
 
+// Set the population size
 void SetPopSize(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -85,6 +91,7 @@ void SetPopSize(OPTIONS* Opt, int argc, char** argv)
 	Opt->PopSize = atoi(argv[1]);
 }
 
+// set the number of QTL
 void SetNoQTL(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -92,6 +99,7 @@ void SetNoQTL(OPTIONS* Opt, int argc, char** argv)
 	Opt->NoQTL = atoi(argv[1]);
 }
 
+// Set ploidy (1 or 2)
 void SetPloidy(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -105,6 +113,7 @@ void SetPloidy(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
+// Toggle the drift on or off
 void SetDrift(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 1);
@@ -115,6 +124,7 @@ void SetDrift(OPTIONS* Opt, int argc, char** argv)
 		Opt->Drift = TRUE;
 }
 
+// Set the environmental variance
 void SetEnvVar(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -122,7 +132,7 @@ void SetEnvVar(OPTIONS* Opt, int argc, char** argv)
 	Opt->EnvVar = atof(argv[1]);
 }
 
-
+// set the mutation scalar 
 void SetMutScalar(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -130,6 +140,7 @@ void SetMutScalar(OPTIONS* Opt, int argc, char** argv)
 	Opt->MuteVarScalar = atof(argv[1]);
 }
 
+// Set the number of generation
 void SetGenerations(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -137,6 +148,7 @@ void SetGenerations(OPTIONS* Opt, int argc, char** argv)
 	Opt->NoGenerations = atoi(argv[1]);
 }
 
+// Set when to change the fitness function 
 void SetChangeFitnessSD(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 3);
@@ -147,6 +159,7 @@ void SetChangeFitnessSD(OPTIONS* Opt, int argc, char** argv)
 	Opt->ChangeFitnessSD = atof(argv[2]);
 }
 
+// Set when to move the fitness function 
 void SetMoveFitnessSD(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 3);
@@ -157,13 +170,14 @@ void SetMoveFitnessSD(OPTIONS* Opt, int argc, char** argv)
 	Opt->MoveFitnessSD = atof(argv[2]);
 }
 
-
+// Set  the random number seed
 void SetSeed(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
 	(void)sscanf(argv[1], "%lu", &Opt->Seed);
 }
 
+// Set Pheotype varaince 
 void SetPheotypeVar(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -171,6 +185,7 @@ void SetPheotypeVar(OPTIONS* Opt, int argc, char** argv)
 	Opt->PheotypeVar  = atof(argv[1]);
 }
 
+// Set heritability  
 void SetHeritabitlity(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -178,6 +193,7 @@ void SetHeritabitlity(OPTIONS* Opt, int argc, char** argv)
 	Opt->Heritabitlity = atof(argv[1]);
 }
 
+// Toggle phenotype standardisation 
 void SetStandardisePhenotype(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 1);
@@ -188,7 +204,7 @@ void SetStandardisePhenotype(OPTIONS* Opt, int argc, char** argv)
 		Opt->StandardisePhenotype = TRUE;
 }
 
-
+// Set the type of fitness function movement
 void SetOptimumMoveType(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -212,6 +228,7 @@ void SetOptimumMoveType(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
+// Set the assortative mating option (not used)
 void SetAssortativeMating(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -226,6 +243,7 @@ void SetAssortativeMating(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
+// Set the initial fitness SD option
 void SetInitFitnessSD(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -240,6 +258,7 @@ void SetInitFitnessSD(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
+// Return which option has been specified 
 optfun GetOptFun(char* Str)
 {
 	int Index;
@@ -258,6 +277,7 @@ optfun GetOptFun(char* Str)
 	return NULL;
 }
 
+// Test if a line is a comment 
 int Comment(int argc, char **argv)
 {
 	if(argc == 0)
@@ -269,6 +289,7 @@ int Comment(int argc, char **argv)
 	return FALSE;
 }
 
+// Set the mutation rate option
 void SetMutationRatePerGamete(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -283,7 +304,7 @@ void SetMutationRatePerGamete(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
-
+// Set the recombination option
 void SetRecombinationPoissonMean(OPTIONS* Opt, int argc, char** argv)
 {
 	TestNoArg(argv[0], argc, 2);
@@ -298,7 +319,7 @@ void SetRecombinationPoissonMean(OPTIONS* Opt, int argc, char** argv)
 	}
 }
 
-
+// Pass the option file
 void PassOptFile(OPTIONS* Opt, char* FName)
 {
 	TEXTFILE *TF;
@@ -326,14 +347,4 @@ void PassOptFile(OPTIONS* Opt, char* FName)
 
 	FreeTextFile(TF);
 	free(Passed);
-}
-
-void PrintHelp()
-{
-	int Index;
-
-	Index=0;
-	while(CMD_LIST[Index].Cmd != NULL)
-		Index++;
-
 }
