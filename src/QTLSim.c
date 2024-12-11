@@ -691,6 +691,33 @@ int*	CreateCombMap(OPTIONS* Opt, int *NoPoints)
 	return Map;
 }
 
+int*	CreateEqualCombMap(OPTIONS* Opt, int *NoPoints)
+{
+	int Index;
+	int *Map;
+	double ChunkSize;
+
+	*NoPoints = (int)Opt->RecombPoissonMean;
+
+	if(*NoPoints == 0 || *NoPoints >= Opt->NoQTL)
+	{
+		printf("err:\n");
+		exit(1);
+	}
+
+	ChunkSize = (double)Opt->NoQTL / (Opt->RecombPoissonMean+1);
+
+	Map = (int*)SMalloc(sizeof(int) * (*NoPoints+1));
+	for(Index=0;Index<*NoPoints;Index++)
+		Map[Index] = (Index+1) * (int)ChunkSize;
+
+	qsort(Map, *NoPoints, sizeof(int), IntComp);
+
+	Map[*NoPoints] = 0; 
+
+	return Map;
+}
+
 void RecombinationPoissonChr(OPTIONS* Opt, double *Chr, double *P1, double *P2)
 {
 	int *CombMap;
@@ -699,6 +726,8 @@ void RecombinationPoissonChr(OPTIONS* Opt, double *Chr, double *P1, double *P2)
 	int Index, PointIndex;
 
 	CombMap = CreateCombMap(Opt, &NoCombMap);
+//	CombMap = CreateEqualCombMap(Opt, &NoCombMap);
+	
 
 	CP = P1;
 	if(gsl_rng_uniform(Opt->rng) < 0.5)
